@@ -11,8 +11,11 @@ import {
 import axios from "axios";
 import FileBase64 from "react-file-base64";
 import { useState } from "react";
+import { useRouter} from "next/router"
+import Image from "next/image"
 
 export default function WorkForm() {
+  const router=useRouter();
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [files, setFiles] = useState({
@@ -54,6 +57,9 @@ export default function WorkForm() {
         onClose={handleClose}
         message="Request Submitted"
       />
+      <center>
+        <Image src="/logo.png" height={125} width={140} alt="logo" layout='intrinsic'/>
+      </center>
       <Formik
         enableReinitialize
         initialValues={{
@@ -106,6 +112,12 @@ export default function WorkForm() {
               console.log(res);
               if (res.status == 200) {
                 handleClick();
+                setTimeout(() => {
+                  alert(
+                    "Your form has been submitted successfully. You are being redirected to home page"
+                  );
+                  router.push("https://flmsservices.in/");
+                }, 2000);
               }
             })
             .catch((err) => {
@@ -300,6 +312,9 @@ export default function WorkForm() {
                 value="submit job application"
               />
             )}
+            <a className="btn-primary home-link" href="https://flmsservices.in/">
+              Home
+            </a>
           </Form>
         )}
       </Formik>
