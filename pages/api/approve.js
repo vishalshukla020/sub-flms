@@ -1,4 +1,7 @@
-const fast2sms = require("fast-two-sms");
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+
+const client = require("twilio")(accountSid, authToken);
 import Post from "../../models/Post";
 
 export default async function handler(req, res) {
@@ -10,15 +13,17 @@ export default async function handler(req, res) {
         });
 
         if (user) {
-          await fast2sms
-            .sendMessage({
-              authorization: process.env.FAST2SMS,
-              message:
-                "kindly follow the link to pay the fee 'https://imjo.in/8xHkVg' for your approved job request at 'FrontLine Security Services'. Phone no.+91-9984-183-277",
-              numbers: [req.body.phone],
+          await client.messages
+            .create({
+              from: "+14357408562",
+              body: "kindly follow the link to pay the fee 'https://imjo.in/8xHkVg' for your approved job request at 'FrontLine Security Services'. Phone no.+91-9984-183-277",
+              to: `+91${req.body.phone}`,
             })
             .then(() => {
               return res.status(200).send("Approved successfully");
+            })
+            .catch((err) => {
+              return res.status(403).send(err);
             });
           return;
         }
@@ -31,14 +36,17 @@ export default async function handler(req, res) {
         });
 
         if (user) {
-          await fast2sms
-            .sendMessage({
-              authorization: process.env.FAST2SMS,
-              message: `Your job request has been approved at 'FrontLine Security Services'`,
-              numbers: [req.body.phone],
+          await client.messages
+            .create({
+              from: "+14357408562",
+              body: "Your job request has been approved at 'FrontLine Security Services'",
+              to: `+91${req.body.phone}`,
             })
             .then(() => {
               return res.status(200).send("Approved successfully");
+            })
+            .catch((err) => {
+              return res.status(403).send(err);
             });
           return;
         }
