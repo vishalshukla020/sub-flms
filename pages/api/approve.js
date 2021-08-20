@@ -1,8 +1,5 @@
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-
-const client = require("twilio")(accountSid, authToken);
 import Post from "../../models/Post";
+var request = require("request");
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
@@ -13,21 +10,34 @@ export default async function handler(req, res) {
         });
 
         if (user) {
-          await client.messages
-            .create({
-              from: "+14357408562",
-              body: "kindly follow the link to pay the fee 'https://imjo.in/8xHkVg' for your approved job request at 'FrontLine Security Services'. Phone no.+91-9984-183-277",
-              to: `+91${req.body.phone}`,
-            })
-            .then(() => {
-              return res.status(200).send("Approved successfully");
-            })
-            .catch((err) => {
-              return res.status(403).send(err);
-            });
-          return;
+          request.post(
+            {
+              url: "https://www.fast2sms.com/dev/bulkV2",
+              headers: {
+                authorization: process.env.FAST2SMS,
+              },
+              form: {
+                message:
+                  "kindly follow the link to pay the fee 'https://imjo.in/8xHkVg' for your approved job request at 'FrontLine Security Services'. Phone no.+91-9984-183-277",
+                language: "english",
+                route: "q",
+                numbers: req.body.phone,
+              },
+            },
+            (err, response, body) => {
+              if (err) {
+                console.log(err.message);
+                return res.status(400).send(err);
+              } else {
+                return res
+                  .status(200)
+                  .send({ msg: "Sent successfully", data: response });
+              }
+            }
+          );
+        } else {
+          return res.status(404).send("user not found");
         }
-        return res.status(404).send("user not found");
       }
 
       if (req.body.type == "approve") {
@@ -36,25 +46,38 @@ export default async function handler(req, res) {
         });
 
         if (user) {
-          await client.messages
-            .create({
-              from: "+14357408562",
-              body: "Your job request has been approved at 'FrontLine Security Services'",
-              to: `+91${req.body.phone}`,
-            })
-            .then(() => {
-              return res.status(200).send("Approved successfully");
-            })
-            .catch((err) => {
-              return res.status(403).send(err);
-            });
-          return;
+          request.post(
+            {
+              url: "https://www.fast2sms.com/dev/bulkV2",
+              headers: {
+                authorization: process.env.FAST2SMS,
+              },
+              form: {
+                message: "Your job request has been approved at FLMS",
+                language: "english",
+                route: "q",
+                numbers: req.body.phone,
+              },
+            },
+            (err, response, body) => {
+              if (err) {
+                console.log(err.message);
+                return res.status(400).send(err);
+              } else {
+                return res
+                  .status(200)
+                  .send({ msg: "Sent successfully", data: response });
+              }
+            }
+          );
+        } else {
+          return res.status(404).send("user not found");
         }
-        return res.status(404).send("user not found");
       }
     } catch (error) {
       return res.status(400).send(error);
     }
+  } else {
+    return res.status(404).send("Method not allowed");
   }
-  res.status(404).send("Method not allowed");
 }
